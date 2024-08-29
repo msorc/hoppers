@@ -1,3 +1,5 @@
+UPDATE: the solution now is considered incomplete with the case test/broken.input. We can return to the visited position with different speed to jump over an obstacle with a higher velocity.
+
 # Hopper
 
 We hope to hop with hopping hope.
