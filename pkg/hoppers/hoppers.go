@@ -2,14 +2,13 @@
 package hoppers
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
+	"slices"
 )
 
 const (
 	maxSpeed = 3
-	obstacleFlag = -1
-	visitedFlag = 1
 )
 
 type Point struct {
@@ -21,10 +20,7 @@ type Point struct {
 // Movement is not performed with error if velicity is zero, point is inside obstacle,
 //   moves outside of the grid, moves into obstacle, already visited
 func (p Point) move(v velocity, grid grid) (Point, error) {
-	if v.noMovement() {
-		return p, errors.New("No movement")
-	}
-	if grid[p.X][p.Y] < 0 {
+	if grid[p.X][p.Y].o {
 		return p, errors.New("Inside obstacle")
 	}
 
@@ -36,12 +32,13 @@ func (p Point) move(v velocity, grid grid) (Point, error) {
 	if newX < 0 || newX > maxX || newY < 0 || newY > maxY {
 		return p, errors.New("Out of border")
 	}
+
 	// Obstacle
-	if grid[newX][newY] < 0 {
+	if grid[newX][newY].o {
 		return p, errors.New("Obstacle")
 	}
 	// Visited before
-	if grid[newX][newY] > 0 {
+	if slices.Contains(grid[newX][newY].vs, v) {
 		return p, errors.New("Already visited")
 	}
 
@@ -76,11 +73,16 @@ type hop struct {
 	v velocity
 }
 
-type grid [][]int
+type grid [][]cell
+
+type cell struct {
+	o bool // is obstacle
+	vs []velocity // with which velocities the cell was visited
+}
 
 // Mark a cell as visited 
-func (g grid) visit(p Point, iteration int) {
-	g[p.X][p.Y] = iteration
+func (g grid) visit(h hop) {
+	g[h.p.X][h.p.Y].vs = append(g[h.p.X][h.p.Y].vs, h.v)
 }
 
 func HopsCount(w, h int, start, finish Point, obstacles [][2]Point) (int, error) {
@@ -102,7 +104,8 @@ func makeStep(hops []hop, finish Point, grid grid, stepsTaken int) (int, error) 
 		if h.p == finish {
 			return stepsTaken, nil
 		}
-		grid.visit(h.p, stepsTaken + 1)
+		grid.visit(h)
+
 		pointHops := hopsFrom(h, grid)
 
 		newHops = append(newHops, pointHops...)
@@ -131,13 +134,13 @@ func PresentResult(result int, err error) string {
 func prepareGrid(w, h int, obstacles [][2]Point) grid {
 	grid := make(grid, w)
 	for i := range grid {
-		grid[i] = make([]int, h)
+		grid[i] = make([]cell, h)
 	}
 
 	for _, o := range obstacles {
 		for x := o[0].X; x <= o[1].X; x++ {
 			for y := o[0].Y; y <= o[1].Y; y++ {
-				grid[x][y] = obstacleFlag
+				grid[x][y].o = true
 			}
 		}
 	}

@@ -17,10 +17,25 @@ func TestHopsCount(t *testing.T) {
 			t.Errorf("Hops should be 7, got: %d", count)
 		}
 		if err != nil {
-			t.Errorf("Error should be nil7, got: %s", err.Error())
+			t.Errorf("Error should be nil, got: %s", err.Error())
 		}
 	})
 		
+	t.Run("Can find with returns", func(t *testing.T) {
+		width, height := 7, 1
+		start := Point{3, 0}
+		finish := Point{6, 0}
+		obstacles := [][2]Point{{Point{4, 0}, Point{5, 0}}}
+
+		count, err := HopsCount(width, height, start, finish, obstacles)
+		if count != 7 {
+			t.Errorf("Hops should be 7, got: %d", count)
+		}
+		if err != nil {
+			t.Errorf("Error should be nil, got: %s", err.Error())
+		}
+	})
+
 	t.Run("Path not found", func(t *testing.T) {
 		width, height := 4, 1
 		start := Point{0, 0}
