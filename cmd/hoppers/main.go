@@ -44,7 +44,7 @@ func processInput() {
 			s := hoppers.Point{numbers[0], numbers[2]}
 			f := hoppers.Point{numbers[1], numbers[3]}
 
-			obstacles = append(obstacles, [2]hoppers.Point{s, f})
+			obstacles[j] = [2]hoppers.Point{s, f}
 		}
 		
 		hops, err := hoppers.HopsCount(width, height, start, finish, obstacles)
